@@ -20,6 +20,8 @@ contract NftMarketplace is ERC721 {
 
     event Listed(uint256 indexed tokenId, uint256 price);
 
+    event UnListed(uint256 indexed tokenId);
+
     event Bought(uint256 indexed tokenId, address buyer, uint256 price);
 
     constructor() ERC721("Marketplace NFT", "MNFT") {
@@ -73,6 +75,7 @@ contract NftMarketplace is ERC721 {
         require(listedNFTs[tokenId].isListed, "NFT is not listed");
 
         listedNFTs[tokenId].isListed = false;
+        emit UnListed(tokenId);
     }
 
     function getListedNFT(uint256 tokenId) public view returns (ListedNFT memory) {
