@@ -16,9 +16,11 @@ contract NftMarketplace is ERC721 {
 
     mapping(uint256 => ListedNFT) public listedNFTs;
 
-    event NFTMinted(uint256 indexed tokenId, address owner);
-    event NFTListed(uint256 indexed tokenId, uint256 price);
-    event NFTBought(uint256 indexed tokenId, address buyer, uint256 price);
+    event NewNFTMinted(uint256 indexed tokenId, address owner);
+
+    event Listed(uint256 indexed tokenId, uint256 price);
+
+    event Bought(uint256 indexed tokenId, address buyer, uint256 price);
 
     constructor() ERC721("Marketplace NFT", "MNFT") {
         owner = msg.sender;
@@ -34,11 +36,11 @@ contract NftMarketplace is ERC721 {
         uint256 tokenId = _nextTokenId;
         _nextTokenId++; 
         _safeMint(to, tokenId);
-        emit NFTMinted(tokenId, to);
+        emit NewNFTMinted(tokenId, to);
     }
 
     function listNFT(uint256 tokenId, uint256 price) public {
-        require(ownerOf(tokenId) == msg.sender, "only the owner can list this NFT");
+        require(ownerOf(tokenId) == msg.sender, "only owner can list this NFT");
         require(price > 0, "price must be greater than zero");
         
         listedNFTs[tokenId] = ListedNFT({
@@ -47,8 +49,7 @@ contract NftMarketplace is ERC721 {
             price: price,
             isListed: true
         });
-
-        emit NFTListed(tokenId, price);
+        emit Listed(tokenId, price);
     }
 
     function buyNFT(uint256 tokenId) public payable {
@@ -64,7 +65,7 @@ contract NftMarketplace is ERC721 {
 
         listedNFT.isListed = false;
 
-        emit NFTBought(tokenId, msg.sender, listedNFT.price);
+        emit Bought(tokenId, msg.sender, listedNFT.price);
     }
 
     function unlistNFT(uint256 tokenId) public {
