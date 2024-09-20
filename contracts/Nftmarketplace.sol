@@ -30,6 +30,7 @@ contract NftMarketplace is ERC721 {
     }
 
     function mintNFT(address to) public onlyOwner {
+        require(to != address(0), "Address 0 spotted");
         uint256 tokenId = _nextTokenId;
         _nextTokenId++; 
         _safeMint(to, tokenId);
