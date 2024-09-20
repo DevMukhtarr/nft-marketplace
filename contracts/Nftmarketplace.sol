@@ -3,9 +3,10 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract NftMarketplace is ERC721 {
+contract NftMarketplace {
     uint256 private _nextTokenId = 1;
     address public owner;
+    IERC721 public nftAddress;
 
     struct ListedNFT {
         uint256 tokenId;
@@ -24,8 +25,9 @@ contract NftMarketplace is ERC721 {
 
     event Bought(uint256 indexed tokenId, address buyer, uint256 price);
 
-    constructor() ERC721("Marketplace NFT", "MNFT") {
+    constructor(address _nftAddress) {
         owner = msg.sender;
+        nftAddress = IERC721(_nftAddress);
     }
 
     modifier onlyOwner() {
@@ -33,16 +35,8 @@ contract NftMarketplace is ERC721 {
         _;
     }
 
-    function mintNFT(address to) public onlyOwner {
-        require(to != address(0), "Address 0 spotted");
-        uint256 tokenId = _nextTokenId;
-        _nextTokenId++; 
-        _safeMint(to, tokenId);
-        emit NewNFTMinted(tokenId, to);
-    }
-
     function listNFT(uint256 tokenId, uint256 price) public {
-        require(ownerOf(tokenId) == msg.sender, "only owner can list this NFT");
+        require(nftAddress.ownerOf(tokenId) == msg.sender, "only owner can list this NFT");
         require(price > 0, "price must be greater than zero");
         
         listedNFTs[tokenId] = ListedNFT({
@@ -61,7 +55,7 @@ contract NftMarketplace is ERC721 {
 
         address payable seller = listedNFT.seller;
 
-        _transfer(seller, msg.sender, tokenId);
+        nftAddress.safeTransferFrom(seller, msg.sender, tokenId);
 
         seller.transfer(msg.value);
 
@@ -71,7 +65,7 @@ contract NftMarketplace is ERC721 {
     }
 
     function unlistNFT(uint256 tokenId) public {
-        require(ownerOf(tokenId) == msg.sender, "Only owner can unlist this NFT");
+        require(nftAddress.ownerOf(tokenId) == msg.sender, "Only owner can unlist this NFT");
         require(listedNFTs[tokenId].isListed, "NFT is not listed");
 
         listedNFTs[tokenId].isListed = false;
