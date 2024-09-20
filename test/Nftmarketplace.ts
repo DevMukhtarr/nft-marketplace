@@ -6,7 +6,7 @@ import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import hre from "hardhat";
 
-describe("EventNft", function () {
+describe("MarketplaceNft", function () {
   // We define a fixture to reuse the same setup in every test.
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
@@ -54,5 +54,13 @@ describe("EventNft", function () {
     .to
     .emit(nft, "NftMinted")
     .withArgs(account2, await nft.tokenId())
+  });
+
+  it("Should not allow a non-owner to mint an NFT", async function () {
+
+    const { nft,marketplace,account2 } = await loadFixture(deployNftAndMarketplaceContract);
+
+    await expect(nft.connect(account2).mint(account2.address))
+      .to.be.revertedWith("Only owner can perform this action");
   });
 });
