@@ -22,6 +22,7 @@ contract MarketplaceNFT is ERC721 {
 
 
     function mint(address to) external {
+        require(msg.sender == owner, "Only owner can perform this action");
         uint256 _newTokenId = tokenId++;
         onlyOwner();
         _mint(to, _newTokenId);
